@@ -10,6 +10,5 @@ RUN apk update \
 	&& rc-update add openvpn default \
 	&& echo "tun" >> /etc/modules \
 	&& cd /var/tmp/openvpn_setup \
-	&& /bin/bash setup.sh \ 
+	&& /bin/bash setup.sh \
 	&& rm -rf /var/tmp/openvpn_setup
-
