@@ -1,7 +1,11 @@
 FROM alpine:latest
 
+MAINTAINER Ulf Gitschthaler
+
+ENV s6version "v1.18.1.5"
+
 # prepare install directory
-ADD https://github.com/just-containers/s6-overlay/releases/download/v1.18.1.5/s6-overlay-amd64.tar.gz /tmp/install/s6-overlay/
+ADD https://github.com/just-containers/s6-overlay/releases/download/${s6version}/s6-overlay-amd64.tar.gz /tmp/install/s6-overlay/
 ADD https://www.privateinternetaccess.com/openvpn/openvpn.zip /tmp/install/openvpn/
 ADD scripts/setup/ /tmp/install/openvpn/
 
