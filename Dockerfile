@@ -1,16 +1,17 @@
 FROM alpine:latest
 
-# s6-overlay
+# prepare install directory
 ADD https://github.com/just-containers/s6-overlay/releases/download/v1.18.1.5/s6-overlay-amd64.tar.gz /tmp/install/s6-overlay/
-
-# pia openvpn configuration
 ADD https://www.privateinternetaccess.com/openvpn/openvpn.zip /tmp/install/openvpn/
-
-# scripts for openvpn installation
-ADD scripts/ /tmp/install/openvpn/
+ADD scripts/setup/ /tmp/install/openvpn/
 
 # install s6-overlay
 RUN tar -xzf /tmp/install/s6-overlay/s6-overlay-amd64.tar.gz -C /
+
+# copy service init and config scripts
+RUN mkdir /etc/services.d/openvpn
+ADD scripts/service/openvpn/ /etc/services.d/openvpn/
+ADD scripts/service/01-contenv-pia /etc/cont-init.d/
 
 # install necessary packages
 RUN apk update \
@@ -23,7 +24,6 @@ WORKDIR /tmp/install/openvpn/
 	
 # configure openvpn
 RUN /bin/bash setupPIA.sh \
-	&& /bin/bash setupTUN.sh \
-	&& /bin/bash setupService.sh
+	&& /bin/bash setupTUN.sh 
 
 ENTRYPOINT ["/init"]

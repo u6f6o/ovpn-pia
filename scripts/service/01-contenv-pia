@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv sh
+
+# read credentials from environment
+echo ${PIA_USER} > /etc/openvpn/auth
+echo -n ${PIA_PASSWORD} >> /etc/openvpn/auth
+
+# link region
+rm -f /etc/openvpn/service.conf
+ln -s /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf

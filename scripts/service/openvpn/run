@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv sh
+
+openvpn --cd /etc/openvpn --config service.conf --auth-nocache
