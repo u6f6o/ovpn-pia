@@ -4,9 +4,13 @@
 unzip -q openvpn.zip
 
 # change credentials, provide absolute paths
-sed -i 's/\(auth-user-pass\)/\1 USER PW/g' *.ovpn
+
+
+# sed -i 's/\(auth-user-pass\)/\1 /etc/openvpn/pass.txt/g' *.ovpn
+sed '/auth-user-pass/d' *.ovpn
 sed -i 's/\(crl[a-zA-Z0-9.]*pem\)/\/etc\/openvpn\/\1/g' *.ovpn
 sed -i 's/\(ca[a-zA-Z0-9.]*crt\)/\/etc\/openvpn\/\1/g' *.ovpn
+# sed -i '$ a daemon' *.ovpn
 
 # copy openvpn config files 
 for f in *.ovpn; do 

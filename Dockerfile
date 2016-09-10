@@ -23,6 +23,7 @@ WORKDIR /tmp/install/openvpn/
 	
 # configure openvpn
 RUN /bin/bash setupPIA.sh \
-	&& /bin/bash setupTUN.sh
+	&& /bin/bash setupTUN.sh \
+	&& /bin/bash setupService.sh
 
-CMD ["openvpn", "--config", "/etc/openvpn/Sweden.ovpn"]
+ENTRYPOINT ["/init"]
