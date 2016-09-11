@@ -23,7 +23,6 @@ RUN mkdir /etc/services.d/openvpn
 ADD scripts/service/openvpn/ /etc/services.d/openvpn/
 ADD scripts/service/01-contenv-pia /etc/cont-init.d/
 
-	
 # change location to setup scripts
 WORKDIR /tmp/install/openvpn/
 	

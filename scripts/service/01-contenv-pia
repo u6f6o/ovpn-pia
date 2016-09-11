@@ -7,3 +7,6 @@ echo -n ${PIA_PASSWORD} >> /etc/openvpn/auth
 # link region
 rm -f /etc/openvpn/service.conf
 ln -s /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf
+
+# unset env variables
+unset PIA_USER PIA_PASSWORD PIA_REGION
