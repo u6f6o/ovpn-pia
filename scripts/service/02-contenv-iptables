@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv sh
+#!/usr/bin/with-contenv bash
 
 # IPTABLE rules according to  
 # https://airvpn.org/topic/9139-prevent-leaks-with-linux-iptables/
@@ -6,17 +6,25 @@
 
 # parse vpn host from config file
 vpnHost=$(grep 'remote ' /etc/openvpn/service.conf | cut -d ' ' -f2)
-echo "Chosen VPN host ${VPN_HOST} resolves to: "
+
+if [ -z "$vpnHost" ]; then
+    echo "Unable to resolve VPN host"
+    exit 1
+fi
 
 # resolve VPN host IPs using nslookup
-vpnHostIPs=($(nslookup ${vpnHost} 2>&1 | grep -E 'Address \d' | grep -oE '\d+(\.\d+){3}'))
-for (( i = 0; i < ${#vpnHostIPs[@]}; i++ )); do 
-	echo ${vpnHostIPs[i]}; 
-done
+vpnHostIPs=$(nslookup ${vpnHost} 2>&1 | grep -E 'Address \d' | grep -oE '\d+(\.\d+){3}')
 
-# check if we got any IPs back
-if [ ${#vpnHostIPs[@]} -eq 0 ]; then
+if [ -z "$vpnHostIPs" ]; then
     echo "Unable to resolve IPs for VPN host"
+    exit 1
+fi
+
+# extract DNS ips from resolv.conf
+dnsIPs=$(grep nameserver /etc/resolv.conf | cut -d ' ' -f2)
+
+if [ -z "$dnsIPs" ]; then
+    echo "Unable to resolve IPs for DNS servers"
     exit 1
 fi
 
@@ -27,9 +35,14 @@ iptables -F
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
-# dhcp 
-iptables -A OUTPUT -d 255.255.255.255 -j ACCEPT
-iptables -A INPUT -s 255.255.255.255 -j ACCEPT 
+# dns 
+for ip in $dnsIPs 
+do
+	iptables -A OUTPUT -p udp -d $ip --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+	iptables -A INPUT  -p udp -s $ip --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+	iptables -A OUTPUT -p tcp -d $ip --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+	iptables -A INPUT  -p tcp -s $ip --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+done
 
 # local network
 iptables -A INPUT -s 192.168.0.0/16 -d 192.168.0.0/16 -j ACCEPT
@@ -47,13 +60,14 @@ iptables -A FORWARD -i tun+ -o eth+ -j ACCEPT
 iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE 
 
 # allow outgoing connections on eth+ towards the vpn servers 
-for (( i = 0; i < ${#vpnHostIPs[@]}; i++ )); do 
-	iptables -A OUTPUT -o eth+ -d ${vpnHostIPs[i]} -j ACCEPT	
+for ip in $vpnHostIPs 
+do 
+	iptables -A OUTPUT -o eth+ -d $ip -j ACCEPT	
 done
 
 # disallow everything else on eth+
 iptables -A OUTPUT -o eth+ -j DROP
 
-# store rules to be safe in case of iptables crash
-/etc/init.d/iptables save
+# save iptable rules
+iptables save
 

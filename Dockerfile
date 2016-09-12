@@ -22,6 +22,7 @@ RUN tar -xzf /tmp/install/s6-overlay/s6-overlay-amd64.tar.gz -C /
 RUN mkdir /etc/services.d/openvpn
 ADD scripts/service/openvpn/ /etc/services.d/openvpn/
 ADD scripts/service/01-contenv-pia /etc/cont-init.d/
+ADD scripts/service/02-contenv-iptables /etc/cont-init.d/
 
 # configure openvpn
 RUN cd /tmp/install/openvpn \

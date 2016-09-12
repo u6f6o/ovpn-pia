@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv sh
+#!/usr/bin/with-contenv bash
 
 # read credentials from environment
 echo ${PIA_USER} > /etc/openvpn/auth
@@ -6,6 +6,13 @@ echo -n ${PIA_PASSWORD} >> /etc/openvpn/auth
 
 # link region
 rm -f /etc/openvpn/service.conf
+
+# check if region file exists
+if [ ! -e /etc/openvpn/${PIA_REGION}.ovpn ]; then 
+	echo "Region file ${PIA_REGION}.ovpn does not exist!"
+    exit 1
+fi
+
 ln -s /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf
 
 # unset env variables
