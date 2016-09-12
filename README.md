@@ -1,5 +1,5 @@
 # docker-openvpn-pia
-Alpine docker image with openvpn for pia (https://www.privateinternetaccess.com)
+Alpine docker image with openvpn for pia (https://www.privateinternetaccess.com) and iptable rules to enforce VPN usage. 
 
 ## Usage
 
@@ -7,4 +7,4 @@ Alpine docker image with openvpn for pia (https://www.privateinternetaccess.com)
 	    -e PIA_USER='YOUR_PIA_USER' \
  	    -e PIA_PASSWORD='YOUR_PIA_PASSWORD' \
 	    -e PIA_REGION='Switzerland' \	 
-	    u6f6o/openvpn-pia:v1.0
+	    u6f6o/openvpn-pia:latest
