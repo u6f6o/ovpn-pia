@@ -23,11 +23,10 @@ RUN mkdir /etc/services.d/openvpn
 ADD scripts/service/openvpn/ /etc/services.d/openvpn/
 ADD scripts/service/01-contenv-pia /etc/cont-init.d/
 
-# change location to setup scripts
-WORKDIR /tmp/install/openvpn/
-	
 # configure openvpn
-RUN /bin/bash setupPIA.sh && /bin/bash setupTUN.sh
+RUN cd /tmp/install/openvpn \
+	&& /bin/bash setupPIA.sh \
+	&& /bin/bash setupTUN.sh 
 
 # cleanup 
 RUN rm -rf /tmp/install 

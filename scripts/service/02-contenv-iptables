@@ -1,0 +1,59 @@
+#!/usr/bin/with-contenv sh
+
+# IPTABLE rules according to  
+# https://airvpn.org/topic/9139-prevent-leaks-with-linux-iptables/
+# with some minor modifications
+
+# parse vpn host from config file
+vpnHost=$(grep 'remote ' /etc/openvpn/service.conf | cut -d ' ' -f2)
+echo "Chosen VPN host ${VPN_HOST} resolves to: "
+
+# resolve VPN host IPs using nslookup
+vpnHostIPs=($(nslookup ${vpnHost} 2>&1 | grep -E 'Address \d' | grep -oE '\d+(\.\d+){3}'))
+for (( i = 0; i < ${#vpnHostIPs[@]}; i++ )); do 
+	echo ${vpnHostIPs[i]}; 
+done
+
+# check if we got any IPs back
+if [ ${#vpnHostIPs[@]} -eq 0 ]; then
+    echo "Unable to resolve IPs for VPN host"
+    exit 1
+fi
+
+# flush existing iptables rules
+iptables -F
+
+# loopback
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# dhcp 
+iptables -A OUTPUT -d 255.255.255.255 -j ACCEPT
+iptables -A INPUT -s 255.255.255.255 -j ACCEPT 
+
+# local network
+iptables -A INPUT -s 192.168.0.0/16 -d 192.168.0.0/16 -j ACCEPT
+iptables -A OUTPUT -s 192.168.0.0/16 -d 192.168.0.0/16 -j ACCEPT
+
+# eth+ <-> tun+ communication
+iptables -A FORWARD -i eth+ -o tun+ -j ACCEPT
+iptables -A FORWARD -i tun+ -o eth+ -j ACCEPT 
+
+ # in the POSTROUTING chain of the NAT table, 
+ # map the tun+ interface outgoing packet IP address, 
+ # cease examining rules and let the header be modified, 
+ # so that we don't have to worry about ports or any other issue 
+ # - please check this rule with care if you have already a NAT table in your chain
+iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE 
+
+# allow outgoing connections on eth+ towards the vpn servers 
+for (( i = 0; i < ${#vpnHostIPs[@]}; i++ )); do 
+	iptables -A OUTPUT -o eth+ -d ${vpnHostIPs[i]} -j ACCEPT	
+done
+
+# disallow everything else on eth+
+iptables -A OUTPUT -o eth+ -j DROP
+
+# store rules to be safe in case of iptables crash
+/etc/init.d/iptables save
+
