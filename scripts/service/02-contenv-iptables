@@ -67,7 +67,3 @@ done
 
 # disallow everything else on eth+
 iptables -A OUTPUT -o eth+ -j DROP
-
-# save iptable rules
-iptables save
-
