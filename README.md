@@ -1,4 +1,4 @@
-# docker-openvpn-pia
+# dckr-openvpn-pia
 Alpine docker image with openvpn for pia (https://www.privateinternetaccess.com) and iptable rules to enforce VPN usage. 
 
 ## Usage
