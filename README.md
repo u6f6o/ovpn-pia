@@ -7,4 +7,4 @@ Alpine docker image with openvpn for pia (https://www.privateinternetaccess.com)
 	    -e PIA_USER='YOUR_PIA_USER' \
  	    -e PIA_PASSWORD='YOUR_PIA_PASSWORD' \
 	    -e PIA_REGION='Switzerland' \	 
-	    u6f6o/openvpn-pia:latest
+	    u6f6o/ovpn-pia:latest
