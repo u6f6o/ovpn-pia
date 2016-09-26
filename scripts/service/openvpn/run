@@ -1,3 +1,3 @@
 #!/usr/bin/with-contenv sh
 
-openvpn --cd /etc/openvpn --config service.conf --auth-nocache
+s6-setuidgid openvpn openvpn --cd /etc/openvpn --config service.conf --auth-nocache

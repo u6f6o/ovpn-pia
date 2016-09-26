@@ -15,5 +15,13 @@ fi
 
 ln -s /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf
 
-# unset env variables
-unset PIA_USER PIA_PASSWORD PIA_REGION
+# use our script instead
+echo "iproute /usr/local/sbin/unpriv-ip"  >> /etc/openvpn/service.conf
+echo "dev tun0"  >> /etc/openvpn/service.conf
+echo "persist-tun"  >> /etc/openvpn/service.conf
+
+usermod -a -G netdev openvpn
+
+# make tun
+openvpn --rmtun --dev tun0
+openvpn --mktun --dev tun0 --dev-type tun --user openvpn --group openvpn

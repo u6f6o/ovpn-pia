@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+awk '!x{x=sub("#stack=log1:NFLOG","stack=log1:NFLOG")}1' /etc/ulogd.conf > /var/tmp/ulogd.conf  
+mv /var/tmp/ulogd.conf /etc/ulogd.conf
+
+ulogd &

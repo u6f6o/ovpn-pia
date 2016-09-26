@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv sh
+
+sleep 15
+ 
+exec s6-setuidgid transmission /usr/bin/transmission-daemon --foreground --config-dir /etc/transmission-daemon
