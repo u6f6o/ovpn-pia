@@ -1,8 +1,10 @@
 #!/usr/bin/with-contenv bash
 
 # read credentials from environment
-echo ${PIA_USER} > /etc/openvpn/auth
-echo -n ${PIA_PASSWORD} >> /etc/openvpn/auth
+cat <<EOF >> /etc/openvpn/auth
+${PIA_USER}
+${PIA_PASSWORD}
+EOF
 
 # link region
 rm -f /etc/openvpn/service.conf
@@ -13,15 +15,19 @@ if [ ! -e /etc/openvpn/${PIA_REGION}.ovpn ]; then
     exit 1
 fi
 
-ln -s /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf
+# use region file as ovpn configuration
+cp /etc/openvpn/${PIA_REGION}.ovpn /etc/openvpn/service.conf
 
-# use our script instead
-echo "iproute /usr/local/sbin/unpriv-ip"  >> /etc/openvpn/service.conf
-echo "dev tun0"  >> /etc/openvpn/service.conf
-echo "persist-tun"  >> /etc/openvpn/service.conf
+sed -i '/dev tun/d' /etc/openvpn/service.conf
+sed -i '/persist-tun/d' /etc/openvpn/service.conf
+sed -i '/iproute/d' /etc/openvpn/service.conf
 
-usermod -a -G netdev openvpn
+cat <<EOF >> /etc/openvpn/service.conf
+iproute /usr/local/sbin/unpriv-ip
+dev tun0
+persist-tun
+EOF
 
-# make tun
+# create tun with righ tuser and group
 openvpn --rmtun --dev tun0
 openvpn --mktun --dev tun0 --dev-type tun --user openvpn --group openvpn
